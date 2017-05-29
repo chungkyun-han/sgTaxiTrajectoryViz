@@ -38,24 +38,6 @@ class TrajectoryView(wx.Panel):
         self.hLines = GPS_xyDrawing.get_sgGrid_hLines(BASE_SCALE * self.scale)
         self.vLines = GPS_xyDrawing.get_sgGrid_vLines(BASE_SCALE * self.scale)
 
-        sgBorder_xy = GPS_xyDrawing.get_sgBoarder_xy(BASE_SCALE * self.scale)
-        #
-        min_x, min_y = 1e400, 1e400
-        for x, y in sgBorder_xy:
-            if x < min_x:
-                min_x = x
-            if y < min_y:
-                min_y = y
-        print 'hLine'
-        for l in self.hLines[:1]:
-            for x, y in l:
-                print x, y
-        print 'vLine'
-        for l in self.vLines[:1]:
-            for x, y in l:
-                print x, y
-
-        # print self.vLines[:2]
         self.InitUI()
 
     def InitUI(self):
@@ -99,6 +81,8 @@ class TrajectoryView(wx.Panel):
         self.translate_mode, self.prev_x, self.prev_y = True, x, y
 
         sgBorder_xy = GPS_xyDrawing.get_sgBoarder_xy(BASE_SCALE * self.scale)
+        self.hLines = GPS_xyDrawing.get_sgGrid_hLines(BASE_SCALE * self.scale)
+        self.vLines = GPS_xyDrawing.get_sgGrid_vLines(BASE_SCALE * self.scale)
         #
         min_x, min_y = 1e400, 1e400
         for x, y in sgBorder_xy:
@@ -108,12 +92,16 @@ class TrajectoryView(wx.Panel):
                 min_y = y
 
         x, y = e.GetX(), e.GetY()
+        actual_x = (min_x + (x - self.translate_x))
+        actual_y = (min_y + (y - self.translate_y))
 
-        actual_x = (min_x + (x - self.translate_x) * self.scale)
-        actual_y = (min_y + (y - self.translate_y) * self.scale)
 
+        print 'scale', self.scale
+        print 'vLine', self.vLines[0][0][0], self.vLines[1][0][0], self.vLines[2][0][0]
+        print 'hLine', self.hLines[-1][0][1], self.hLines[-2][0][1], self.hLines[-3][0][1]
         print 'x,y',  x, y
         print actual_x, actual_y
+        print ''
 
         self.SetFocus()
         self.CaptureMouse()
