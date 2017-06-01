@@ -1,14 +1,10 @@
-import __init__
+from __init__ import *
 #
 from sgTaxiCommon.geo_functions import get_sgBorder, get_sgRoads, get_sgGrid, get_sgBuildings
 from sgTaxiCommon.fileHandling_functions import path_merge, check_path_exist, check_dir_create, \
                                                 save_pickle_file, load_pickle_file
 #
-xyCoords = 'xyCoords'
-try:
-    check_dir_create(xyCoords)
-except OSError:
-    pass
+of_dpath = dpaths['bgXY']
 
 
 min_lon, max_lon = 1e400, -1e400
@@ -26,19 +22,8 @@ for lon, lat in sgBorder:
         max_lat = lat
 
 
-def convert_GPS2xy(scale, lon, lat):
-    x = (lon - min_lon) * scale
-    y = (max_lat - (lat - min_lat)) * scale
-    return x, y
-
-def convert_xy2GPS(scale, x, y):
-    lon = 0
-    lat = 0
-    return lon, lat
-
-
-def get_sgBoarder_xy(scale):
-    ofpath = path_merge(xyCoords, 'sgBorder_xy(s%d).pkl' % scale)
+def get_sgBoarderXY(scale):
+    ofpath = path_merge(of_dpath, 'sgBorderXY(s%d).pkl' % scale)
     if not check_path_exist(ofpath):
         sgBorder_xy = []
         for lon, lat in sgBorder:
@@ -50,8 +35,8 @@ def get_sgBoarder_xy(scale):
     return sgBorder_xy
 
 
-def get_sgGrid_xy(scale):
-    ofpath = path_merge(xyCoords, 'sgGrid_xy(s%d).pkl' % scale)
+def get_sgGridXY(scale):
+    ofpath = path_merge(of_dpath, 'sgGridXY(s%d).pkl' % scale)
     if check_path_exist(ofpath):
         sgGrid_xy = load_pickle_file(ofpath)
     else:
@@ -69,38 +54,8 @@ def get_sgGrid_xy(scale):
     return sgGrid_xy
 
 
-def get_sgGrid_hLines(scale):
-    ofpath = path_merge(xyCoords, 'sgGrid_hLines(s%d).pkl' % scale)
-    if check_path_exist(ofpath):
-        sgGrid_hLines = load_pickle_file(ofpath)
-    else:
-        sgGrid_hLines = []
-        lons, lats = get_sgGrid()
-        for lat in lats:
-            sx, sy = convert_GPS2xy(scale, lons[0], lat)
-            ex, ey = convert_GPS2xy(scale, lons[-1], lat)
-            sgGrid_hLines += [[(sx, sy), (ex, ey)]]
-        save_pickle_file(ofpath, sgGrid_hLines)
-    return sgGrid_hLines
-
-
-def get_sgGrid_vLines(scale):
-    ofpath = path_merge(xyCoords, 'sgGrid_vLines(s%d).pkl' % scale)
-    if check_path_exist(ofpath):
-        sgGrid_vLines = load_pickle_file(ofpath)
-    else:
-        sgGrid_vLines = []
-        lons, lats = get_sgGrid()
-        for lon in lons:
-            sx, sy = convert_GPS2xy(scale, lon, lats[0])
-            ex, ey = convert_GPS2xy(scale, lon, lats[-1])
-            sgGrid_vLines += [[(sx, sy), (ex, ey)]]
-        save_pickle_file(ofpath, sgGrid_vLines)
-    return sgGrid_vLines
-
-
-def get_sgRords_xy(scale):
-    ofpath = path_merge(xyCoords, 'sgRoards_xy(s%d).pkl' % scale)
+def get_sgRordsXY(scale):
+    ofpath = path_merge(of_dpath, 'sgRoardsXY(s%d).pkl' % scale)
     if check_path_exist(ofpath):
         sgRoards_xy = load_pickle_file(ofpath)
     else:
@@ -114,8 +69,8 @@ def get_sgRords_xy(scale):
     return sgRoards_xy
 
 
-def get_sgBuildings_xy(scale):
-    ofpath = path_merge(xyCoords, 'sgBuildings_xy(s%d).pkl' % scale)
+def get_sgBuildingsXY(scale):
+    ofpath = path_merge(of_dpath, 'sgBuildingsXY(s%d).pkl' % scale)
     if check_path_exist(ofpath):
         sgBuildings_xy = load_pickle_file(ofpath)
     else:
@@ -129,9 +84,27 @@ def get_sgBuildings_xy(scale):
     return sgBuildings_xy
 
 
+def convert_GPS2xy(scale, lon, lat):
+    x = (lon - min_lon) * scale
+    y = (max_lat - (lat - min_lat)) * scale
+    return x, y
+
+
+def get_sgLonsLatsXY(scale):
+    ofpath = path_merge(of_dpath, 'sgLonsLatsXY(s%d).pkl' % scale)
+    if check_path_exist(ofpath):
+        sgLonsX, sgLatsY = load_pickle_file(ofpath)
+    else:
+        lons, lats = get_sgGrid()
+        sgLonsX = [(lon - min_lon) * scale for lon in lons]
+        sgLatsY = [(max_lat - (lat - min_lat)) * scale for lat in lats]
+        sgLonsX.sort(); sgLatsY.sort()
+        save_pickle_file(ofpath, [sgLonsX, sgLatsY])
+    return sgLonsX, sgLatsY
+
 
 if __name__ == '__main__':
     BASE_SCALE = 2500
-    print get_sgBoarder_xy(BASE_SCALE * 1)
+    print get_sgBoarderXY(BASE_SCALE * 1)
     # get_sgRoards_xy()
     # get_sgGrid_xy()

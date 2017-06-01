@@ -1,9 +1,8 @@
-
+*.pyc
 .gitignore
 .idea/
 /z_data/driverLogGPS/
 /z_data/driverLogXY/
 /bgImgs/
 /xyCoords/
-*.pyc
 z_data/

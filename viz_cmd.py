@@ -1,4 +1,6 @@
-import __init__
+from __init__ import *
+#
+from sgTaxiCommon.fileHandling_functions import path_merge
 #
 import wx
 import os.path as opath
@@ -11,6 +13,8 @@ ID_CONTROL_SKIP = wx.NewId()
 # ID_CONTROL_F_UP = wx.NewId()
 # ID_CONTROL_F_DOWN = wx.NewId()
 
+
+res_dpath = dpaths['res']
 
 def set_command_interface(frame):
     frame.mbar = wx.MenuBar()
@@ -27,13 +31,12 @@ def set_command_interface(frame):
     frame.mbar.Append(cmenu, '&Control')
     frame.SetMenuBar(frame.mbar)
     # tool bar
-    bd = opath.join(opath.dirname(__file__), 'res')
     frame.tbar = frame.CreateToolBar()
-    frame.tbar.AddCheckTool(ID_CONTROL_PLAY, load_icon('play.bmp', bd))
-    frame.tbar.AddSimpleTool(ID_CONTROL_S_DOWN, load_icon('speed_down.bmp', bd))
-    frame.tbar.AddSimpleTool(ID_CONTROL_S_UP, load_icon('speed_up.bmp', bd))
+    frame.tbar.AddCheckTool(ID_CONTROL_PLAY, load_icon('play.bmp'))
+    frame.tbar.AddSimpleTool(ID_CONTROL_S_DOWN, load_icon('speed_down.bmp'))
+    frame.tbar.AddSimpleTool(ID_CONTROL_S_UP, load_icon('speed_up.bmp'))
     frame.tbar.AddSeparator()
-    frame.tbar.AddSimpleTool(ID_CONTROL_SKIP, load_icon('skip.bmp', bd))
+    frame.tbar.AddSimpleTool(ID_CONTROL_SKIP, load_icon('skip.bmp'))
     # frame.tbar.AddSeparator()
     # frame.tbar.AddSimpleTool(ID_CONTROL_F_DOWN, load_icon('frame_down.bmp', bd))
     # frame.tbar.AddSimpleTool(ID_CONTROL_F_UP, load_icon('frame_up.bmp', bd))
@@ -47,9 +50,7 @@ def set_command_interface(frame):
     # frame.Bind(wx.EVT_MENU, frame.OnFrameRate, id=ID_CONTROL_F_DOWN)
 
 
-def load_icon(path, base_dir=None):
-    if base_dir:
-        path = opath.join(base_dir, path)
-    bmp = wx.Bitmap(path, wx.BITMAP_TYPE_BMP)
+def load_icon(path):
+    bmp = wx.Bitmap(path_merge(res_dpath, path), wx.BITMAP_TYPE_BMP)
     bmp.SetMaskColour(wx.Colour(0, 128, 128))
     return bmp

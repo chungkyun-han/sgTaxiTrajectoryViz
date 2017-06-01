@@ -6,59 +6,58 @@ from _classes import driver
 import timeKeeper as tk
 from trajectoryView import TrajectoryView
 from timeFlowView import TimeFlowView
-import log_xyCoords
 #
 from datetime import timedelta, datetime
 from time import time
 #
+from sgTaxiCommon.fileHandling_functions import get_all_files
 
-target_drivers = log_xyCoords.run()
+target_drivers = []
+if_dpath = dpaths['driverLogGPS']
+if_prefix = 'driverLogGPS-'
+for fn in get_all_files(if_dpath, '%s*' % if_prefix):
+    _, _did = fn[:-len('.csv')].split('-')
+    target_drivers += [int(_did)]
 
 
 class MainFrame(wx.Frame):
     def __init__(self, title="DriverTrajectory", pos=(30, 30), size=(1600, 1100)):
         wx.Frame.__init__(self, None, -1, title, pos, size)
-        self.drivers = None
-
-
-
         # simulation speed and refresh setting
         self.is_paused = True
         self.speed_factor, self.scene_refresh_factor = 14, 30
         self.tx = SPEED_BASE ** self.speed_factor
         #
-        # self.InitTimeDrivers()
+        # self.drivers = None
+        self.InitTimeDrivers()
         self.InitUI()
         #
         self.Show(True)
         self.Centre()
         self.Maximize()
-
         #
         # create timer.
         self.timer, self.timer_tick = wx.Timer(self), 0
         self.Bind(wx.EVT_TIMER, self.OnTimer, self.timer)
 
     def InitTimeDrivers(self):
-        self.drivers = {}
+        self.drivers = {did: driver(did) for did in target_drivers}
+        #
         latest_fist_dt, earliest_last_dt = None, None
-        for did in target_drivers:
-            d = driver(did)
-            first_dt, last_dt = d.dt_xy_state[0][0], d.dt_xy_state[-1][0]
+        tk.datehours = set()
+        for d in self.drivers.itervalues():
+            first_dt, last_dt = d.dt_lonlat_state[0][0], d.dt_lonlat_state[-1][0]
             if latest_fist_dt == None or latest_fist_dt < first_dt:
                 latest_fist_dt = first_dt
             if earliest_last_dt == None or earliest_last_dt > last_dt:
                 earliest_last_dt = last_dt
-            self.drivers[did] = d
-        tk.min_dt, tk.max_dt = latest_fist_dt, earliest_last_dt
-        tk.now = tk.min_dt
-        tk.datehours = set()
-        for d in self.drivers.itervalues():
-            d.update_dt_xy_state(tk.now)
-            for dt, _, _, _ in d.dt_xy_state:
+            for dt, _, _, _ in d.dt_lonlat_state:
                 tk.datehours.add(datetime(dt.year, dt.month, dt.day, dt.hour))
+        tk.min_dt, tk.max_dt = latest_fist_dt, earliest_last_dt
         tk.datehours = list(tk.datehours)
         tk.datehours.sort()
+        #
+        tk.now = tk.min_dt
 
     def InitUI(self):
         # set menu & tool bar, and bind events.
